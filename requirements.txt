@@ -1,10 +1,2 @@
 Flask
 gunicorn
-datetime
-calendar
-matplotlib
-pandas_datareader
-numpy
-pandas
-json
-time

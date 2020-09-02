@@ -1,0 +1,369 @@
+body {
+    margin: 0;
+    padding: 0;
+    /* font-family: Helvetica, Arila, "LiHei Pro", "Microsoft JhengHei", "新細明體", serif; */
+    color: #555555;
+}
+
+h2 {
+    margin: 0;
+    font-size: 36px;
+}
+
+h3 {
+    font-size: 24px;
+}
+
+a {
+    font-size: 16px;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+button,
+input,
+select {
+    padding: 10px;
+}
+
+input,
+select {
+    border: 1px solid #adb5bd;
+    border-radius: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+button:focus,
+input:focus,
+select:focus {
+    outline: none;
+}
+
+.flex {
+    display: flex;
+}
+
+.customWidth {
+    max-width: 1200px;
+    padding: 0 20px;
+    margin: auto;
+}
+
+
+/*header--------------------------------------------------------------*/
+
+.header {
+    border-bottom: 1px solid #adb5bd;
+}
+
+.header .customWidth {
+    display: flex;
+    padding: 20px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header .logo h2 {
+    font-size: 28px;
+}
+
+.header ul {
+    list-style: none;
+    display: flex;
+}
+
+.header ul a {
+    text-decoration: none;
+    padding: 10px;
+}
+
+.pageContent {
+    padding: 40px;
+}
+
+.pageContent form {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.backtest {
+    width: 100%;
+    display: flex;
+    margin-bottom: 20px;
+    justify-content: space-between;
+}
+
+.backtest>div {
+    width: 24%;
+}
+
+.backtest label {
+    margin-bottom: 5px;
+    display: block;
+}
+
+.backtest .stock .flex {
+    justify-content: space-between;
+}
+
+.backtest .stock .flex select {
+    width: 26%;
+}
+
+.backtest .stock .flex select+select {
+    width: 70%;
+}
+
+
+/* .backtest .sheet select,
+.backtest .buyMethod select,
+.backtest .time select {
+    width: 100%;
+} */
+
+.sale {
+    width: 49%;
+}
+
+.sale .flex {
+    justify-content: space-between;
+}
+
+.technical>div {
+    display: flex;
+    margin-top: 10px;
+    align-items: center;
+    border: 1px solid #adb5bd;
+    padding: 10px 15px;
+}
+
+.technical>div>div {
+    width: 100%;
+    position: relative;
+}
+
+.technical>div>div+div {
+    margin-left: 10px;
+}
+
+.technical select,
+.technical input {
+    width: 100%;
+    box-sizing: border-box;
+    border: none;
+    color: #555555;
+    padding: 5px;
+    font-size: 16px;
+    text-align: center;
+}
+
+
+/* .technical input {
+    width: 90px;
+} */
+
+
+/* .technical input {
+    border-bottom: 1px solid #adb5bd;
+} */
+
+.technical>div>.ch {
+    flex: 0 0 20px;
+}
+
+.technical>div>.ch input {
+    width: auto;
+}
+
+.technical .error {
+    position: absolute;
+    padding: 2px 5px;
+    background: red;
+    color: #fff;
+    font-size: 12px;
+    width: 38px;
+    text-align: center;
+}
+
+.technical .column_day,
+.technical .rsi_v,
+.technical .rsi_day,
+.technical .kd_v,
+.technical .kd_day,
+.technical .many_day {
+    display: flex;
+}
+
+.technical .column_day span,
+.technical .rsi_v span,
+.technical .rsi_day span,
+.technical .kd_v span,
+.technical .kd_day span,
+.technical .many_day span {
+    line-height: 29px;
+}
+
+.technical .column_day span.text {
+    width: 110px;
+    margin-left: 10px;
+}
+
+.technical .rsi_day span,
+.technical .kd_day span {
+    width: 115px;
+}
+
+
+/* .technical .kd .kd_day_span {
+    flex: 0 0 56px;
+    margin-right: -20px;
+}
+
+.technical .kd .kd_day_span2 {
+    flex: 0 0 10px;
+    margin-right: -20px;
+} */
+
+.technical .kd .kd_many_day_span,
+.technical .ma .ma_many_day_span,
+.technical .price .price_many_day_span,
+.technical .rsi .rsi_many_day_span {
+    flex: 0 0 15px;
+}
+
+
+/* .technical .rsi .rsi_day_span {
+    flex: 0 0 90px;
+} */
+
+.technical .ma select {
+    min-width: 60px;
+}
+
+.technical .ma .ma_day {
+    width: 180px;
+}
+
+.technical .ma .ma_day_span {
+    flex: 0 0 65px;
+    margin-left: 20px;
+}
+
+.technical .ma .ma_day_span2 {
+    flex: 0 0 65px;
+}
+
+.technical .price .price_up_Select {
+    min-width: 150px;
+}
+
+.technical .price .price_day_span {
+    flex: 0 0 65px;
+    /* margin-right: -10px */
+}
+
+.technical .price .price_many_span {
+    flex: 0 0 35px;
+}
+
+
+/* .technical .price .price_day,
+.technical .price .price_number {
+    width: 180px;
+} */
+
+.technical .price .price_number_span {
+    flex: 0 0 30px;
+    /* margin-right: -10px */
+}
+
+.starBacktestDiv {
+    width: 100%;
+    margin: 20px 0 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.starBacktestDiv button {
+    width: 100%;
+    border: none;
+    color: #fff;
+    background-color: #42495f;
+    padding: 15px 0;
+    border-radius: 0;
+    cursor: pointer;
+}
+
+.report {
+    width: 100%;
+}
+
+.report lable {
+    display: block;
+    margin-bottom: 20px;
+}
+
+.report .lineGraph {
+    margin-bottom: 20px;
+}
+
+.report .reportForm ul {
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid #adb5bd;
+}
+
+.report .reportForm ul+ul {
+    border-top: none
+}
+
+.report .reportForm ul li {
+    padding: 15px;
+    width: 14.28%;
+}
+
+.report .reportForm ul li+li {
+    border-left: 1px solid #adb5bd;
+}
+
+
+/* #container {
+  height: 600px;
+} */
+
+#container .highcharts-grid.highcharts-yaxis-grid.y_line_color {
+    outline: 1px solid #ddd;
+}
+
+
+/* #container .highcharts-grid.highcharts-yaxis-grid.y_line_color path {
+  stroke: rgba(0, 0, 0, 0);
+} */
+
+#container .highcharts-axis.highcharts-xaxis {
+    opacity: 0;
+}
+
+
+/* #container .highcharts-tooltip {
+  opacity: 1!important;
+  visibility: inherit!important;
+} */
+
+#container .highcharts-label.highcharts-tooltip-header.highcharts-tooltip-box.highcharts-color-none .highcharts-label-box {
+    fill: #596070;
+    padding: 10px;
+}
+
+#container .formatData {
+    color: #fff;
+    padding: 5px;
+}

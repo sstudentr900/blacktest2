@@ -8,7 +8,7 @@ from flask import  (
 #時間範圍
 import datetime,calendar
 #用于绘制图表
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 #撈股票價格
 import pandas_datareader as pdr
 #时间序列的计算
@@ -16,7 +16,7 @@ import numpy as np
 #处理结构化的表格数据
 import pandas as pd
 import json
-import time
+# import time
 
 app= Flask(__name__, static_url_path='/static')
 app.config['DEBUG'] =True

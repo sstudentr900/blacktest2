@@ -44,7 +44,7 @@ function HighchartsFn(o) {
                     position;
                 if (point.isHeader) {
                     //date
-                    console.log(point.plotY)
+                    // console.log(point.plotY)
                     position = {
                         x: Math.max(
                             // Left side limit
@@ -1303,133 +1303,98 @@ function removeElement(parent, select) {
         })
     }
 }
-document.querySelectorAll('.many_select').forEach(obj => {
-    obj.addEventListener('change', () => {
-        var parent = obj.parentElement
-        var parentT = parent.parentElement
-        var objValue = obj.value
-        var classNameDay = 'many_day'
-        removeElement(parentT, '.' + classNameDay)
-        if (objValue == 'y') {
-            var input = document.createElement('input');
-            input.setAttribute('type', 'number')
-            input.setAttribute('name', 'many_day')
-            input.setAttribute('min', '1')
-            input.setAttribute('value', '1')
-            var span = document.createElement('span');
-            span.innerText = '日';
-            var div = document.createElement('div');
-            div.classList.add(classNameDay);
-            div.append(input, span);
-            parent.after(div);
-        }
+
+function many_select() {
+    document.querySelectorAll('.many_select').forEach(obj => {
+        obj.addEventListener('change', () => {
+            var parent = obj.parentElement
+            var parentT = parent.parentElement
+            var objValue = obj.value
+            var classNameDay = 'many_day'
+            removeElement(parentT, '.' + classNameDay)
+            if (objValue == 'y') {
+                var input = document.createElement('input');
+                input.setAttribute('type', 'number')
+                input.setAttribute('name', 'many_day')
+                input.setAttribute('min', '1')
+                input.setAttribute('value', '1')
+                var span = document.createElement('span');
+                span.innerText = '日';
+                var div = document.createElement('div');
+                div.classList.add(classNameDay);
+                div.append(input, span);
+                parent.after(div);
+            }
+        })
     })
-})
-document.querySelectorAll('.kd_up_select').forEach(obj => {
-    obj.addEventListener('change', () => {
-        var parent = obj.parentElement
-        var parentT = parent.parentElement
-        var objValue = obj.value
-        var className = 'kd_v'
-        var input = '';
-        removeElement(parentT, '.' + className)
-        if (objValue == 'up' || objValue == 'low') {
-            input = document.createElement('input');
-            input.setAttribute('type', 'number')
-            input.setAttribute('name', 'v')
-            input.setAttribute('min', '1')
-            input.setAttribute('value', '20')
-            var span = document.createElement('span');
-            span.innerText = '且';
-            var div = document.createElement('div');
-            div.classList.add(className);
-            div.append(input, span);
-            parent.after(div);
-        }
+}
 
+function kd_select() {
+    document.querySelectorAll('.kd_up_select').forEach(obj => {
+        obj.addEventListener('change', () => {
+            var parent = obj.parentElement
+            var parentT = parent.parentElement
+            var objValue = obj.value
+            var className = 'kd_v'
+            var input = '';
+            removeElement(parentT, '.' + className)
+            if (objValue == 'up' || objValue == 'low') {
+                input = document.createElement('input');
+                input.setAttribute('type', 'number')
+                input.setAttribute('name', 'v')
+                input.setAttribute('min', '1')
+                input.setAttribute('value', '20')
+                var span = document.createElement('span');
+                span.innerText = '且';
+                var div = document.createElement('div');
+                div.classList.add(className);
+                div.append(input, span);
+                parent.after(div);
+            }
+
+        })
     })
-})
-document.querySelectorAll('.price_up_Select').forEach(obj => {
+}
 
-    obj.addEventListener('change', () => {
-        var price_up = obj.parentElement
-
-        var price_number_name = 'price_number'
-        var price_number = createInput({
-            'className': price_number_name,
-            'input': 'input',
-            'inputs': {
-                'type': 'number',
-                'name': 'number',
-                'min': '1',
-                'value': 2
-            }
-        })
-
-        var price_number_span = 'price_number_span'
-        var price_number_div = createInput({
-            'className': price_number_span,
-            'input': 'span',
-            'text': '%，',
-        })
-
-        var price_day_name = 'price_day'
-        var price_day = createInput({
-            'className': price_day_name,
-            'input': 'input',
-            'inputs': {
-                'type': 'number',
-                'name': 'day',
-                'min': '1',
-                'value': 5
-            }
-        })
-
-        var price_day_span = 'price_day_span'
-        var price_day_div = createInput({
-            'className': price_day_span,
-            'input': 'span',
-            'text': '日均線，',
-        })
-
-        var objValue = obj.value
-        var removeFn = function() {
-            var next = price_up.nextElementSibling
-            var next_span = next.nextElementSibling
-            if (next.className == price_number_name || next.className == price_day_name) {
-                next.textContent = ''
-                next.remove()
-            }
-            if (next_span.className == price_number_span || next_span.className == price_day_span) {
-                next_span.textContent = ''
-                next_span.remove()
-            }
-        }
-        removeFn()
-        if (objValue == 'up' || objValue == 'low') {
-            price_up.after(price_number, price_number_div)
-        }
-        if (objValue == 'up_m' || objValue == 'low_m') {
-            price_up.after(price_day, price_day_div)
-        }
-    })
-})
+function inputCheck(input) {
+    var parentInput = input.parentElement
+    var errorObj = document.createElement('div')
+    errorObj.classList.add('error')
+    if (input.value == '') {
+        errorObj.innerHTML = '未填寫'
+    } else {
+        errorObj.innerHTML = '錯誤'
+    }
+    parentInput.append(errorObj)
+}
+//送出
 document.querySelector('.starBacktestButton').addEventListener('click', () => {
-    var fromObj = {}
-    var selects = document.querySelectorAll('.backtest select,.backtest input')
-    selects.forEach(select => {
-        fromObj[select.name] = select.value
-    })
+        var fromObj = {}
+        var error = false
 
-    var chs = document.querySelectorAll('.sale .ch input')
-    var error = false
-    var saleTexts = []
-    chs.forEach(ch => {
-        if (ch.checked == true) {
-            var parentCh = ch.parentElement.parentElement
-            var saleName = parentCh.parentElement.parentElement.className.split(' ')[1]
-            var inputs = parentCh.querySelectorAll('input,select')
+        var selects = document.querySelectorAll('.backtest select,.backtest input')
+        selects.forEach(select => {
+            if (select.value) {
+                fromObj[select.name] = select.value
+            } else {
+                inputCheck(select)
+                error = true
+            }
+            select.addEventListener('focus', () => {
+                removeElement(document, '.error')
+            })
+        })
+
+        var saleDivs = document.querySelectorAll('.sale .technical>div')
+        var saleTexts = []
+            // console.log(saleDivs)
+        saleDivs.forEach(saleDiv => {
+            // if (inputs.checked == true) {
+            // var parentInput = saleDiv.parentElement.parentElement
+            var saleName = saleDiv.parentElement.parentElement.className.split(' ')[1]
+            var inputs = saleDiv.querySelectorAll('input,select')
             var condition = {}
+            condition['ch'] = saleDiv.className.split(' ')[0]
                 // 進場出場
             if (saleTexts.indexOf(saleName) == '-1') {
                 fromObj[saleName] = []
@@ -1439,15 +1404,17 @@ document.querySelector('.starBacktestButton').addEventListener('click', () => {
                 if (input.type == 'checkbox' || input.type == 'select-one' || input.type == 'number' && input.value > 0) {
                     condition[input.name] = input.value
                 } else if (input.type != 'checkbox') {
-                    var parentInput = input.parentElement
-                    var errorObj = document.createElement('div')
-                    errorObj.classList.add('error')
-                    if (input.value == '') {
-                        errorObj.innerHTML = '未填寫'
-                    } else {
-                        errorObj.innerHTML = '錯誤'
-                    }
-                    parentInput.append(errorObj)
+                    // var parentInput = input.parentElement
+                    // var errorObj = document.createElement('div')
+                    // errorObj.classList.add('error')
+                    // if (input.value == '') {
+                    //     errorObj.innerHTML = '未填寫'
+                    // } else {
+                    //     errorObj.innerHTML = '錯誤'
+                    // }
+                    // parentInput.append(errorObj)
+                    // error = true
+                    inputCheck(input)
                     error = true
                 }
 
@@ -1456,31 +1423,31 @@ document.querySelector('.starBacktestButton').addEventListener('click', () => {
                 })
             })
             fromObj[saleName].push(condition)
-        }
-    })
+                // }
+        })
 
-    // 進出場沒有設定
-    if (!error && saleTexts.length != '2') {
-        alert('錯誤!!進出場條件都需要設定')
-    }
-    if (!error) {
-        // console.log(fromObj)
-        ajax({
-            u: 'backtest',
-            a: fromObj
-        }).then(function(data) {
-            if (data.result == 'true') {
-                //img
-                HighchartsFn({
-                        'data': data.imgPoints
-                    })
-                    // var imgPoints = data.imgPoints.Close
-                    // chart.series[0].addPoint(imgPoints, false, false);
-                    // chart.redraw();
-                    //table
-                var tablePoints = data.table
-                var reportForm = document.querySelector('.reportForm')
-                var datetop = `<ul>
+        // 進出場沒有設定
+        if (!error && saleTexts.length != '2') {
+            alert('錯誤!!進出場條件都需要設定')
+        }
+        if (!error) {
+            // console.log(fromObj)
+            ajax({
+                u: 'backtest',
+                a: fromObj
+            }).then(function(data) {
+                if (data.result == 'true') {
+                    //img
+                    HighchartsFn({
+                            'data': data.imgPoints
+                        })
+                        // var imgPoints = data.imgPoints.Close
+                        // chart.series[0].addPoint(imgPoints, false, false);
+                        // chart.redraw();
+                        //table
+                    var tablePoints = data.table
+                    var reportForm = document.querySelector('.reportForm')
+                    var datetop = `<ul>
                   <li>股票代號</li>
                   <li>交易日期</li>
                   <li>累積張數</li>
@@ -1491,22 +1458,108 @@ document.querySelector('.starBacktestButton').addEventListener('click', () => {
                   <li>賣出損益</li>
                   <li>賣出報酬</li>
               </ul>`
-                reportForm.innerHTML = ''
-                reportForm.innerHTML = datetop
-                tablePoints.forEach(tablePoint => {
-                    var ul = document.createElement('ul')
-                    ul.classList.add('bulldate')
-                    tablePoint.forEach(element => {
-                        var li = document.createElement('li')
-                        li.innerHTML = element
-                        ul.append(li)
-                    })
-                    reportForm.append(ul)
+                    reportForm.innerHTML = ''
+                    reportForm.innerHTML = datetop
+                    tablePoints.forEach(tablePoint => {
+                        var ul = document.createElement('ul')
+                        ul.classList.add('bulldate')
+                        tablePoint.forEach(element => {
+                            var li = document.createElement('li')
+                            li.innerHTML = element
+                            ul.append(li)
+                        })
+                        reportForm.append(ul)
 
-                })
-            } else {
-                alert(data.errorInfo)
+                    })
+                } else {
+                    alert(data.errorInfo)
+                }
+            })
+        }
+    })
+    //條件
+document.querySelectorAll('.sale button').forEach(obj => {
+    obj.addEventListener('click', () => {
+        var technology = document.querySelector('.technology')
+        var displayNone = function() {
+            technology.style.display = 'none'
+        }
+        var enterFn = () => {
+            var parent = obj.parentElement.parentElement
+            var chs = technology.querySelectorAll('.ch input')
+            var error = false
+            var technical = parent.querySelector('.technical')
+            chs.forEach(ch => {
+                if (ch.checked == true) {
+                    var parentCh = ch.parentElement.parentElement
+                    var inputs = parentCh.querySelectorAll('input,select')
+                    inputs.forEach(input => {
+                        if (input.type == 'number' && input.value <= 0) {
+                            inputCheck(input)
+                            error = true
+                                // var parentInput = input.parentElement
+                                //     // console.log(input.type != 'checkbox', input.type, 'checkbox')
+                                // var errorObj = document.createElement('div')
+                                // errorObj.classList.add('error')
+                                // if (input.value == '') {
+                                //     errorObj.innerHTML = '未填寫'
+                                // } else {
+                                //     errorObj.innerHTML = '錯誤'
+                                // }
+                                // parentInput.append(errorObj)
+                                // error = true
+                        }
+
+                        input.addEventListener('focus', () => {
+                            removeElement(document, '.error')
+                        })
+                    })
+                    if (!error) {
+                        ch.checked = false
+                        var html = parentCh.cloneNode(true)
+                        html.querySelector('.ch').remove()
+                            //select
+                        parentCh.querySelectorAll('select').forEach((o) => {
+                                html.querySelectorAll('select').forEach((i) => {
+                                    if (o.className == i.className) {
+                                        i[o.selectedIndex].selected = true;
+                                    }
+                                })
+                            })
+                            //deDiv
+                        var deDiv = document.createElement('div')
+                        deDiv.classList.add('de')
+                            //button
+                        var button = document.createElement('button')
+                        button.innerHTML = "&times;"
+                        button.addEventListener('click', () => {
+                                html.remove()
+                            })
+                            // ch.append(button)
+                        deDiv.append(button)
+                        html.append(deDiv)
+                        technical.append(html)
+                    }
+                }
+            })
+            if (!error) {
+                displayNone()
+                many_select()
+                kd_select()
+                technology.querySelector('.enter').removeEventListener('click', enterFn)
             }
-        })
-    }
+        }
+        many_select()
+        kd_select()
+        technology.style.display = 'flex'
+        technology.querySelector('.enter').addEventListener('click', enterFn)
+        technology.querySelector('.close').addEventListener('click', displayNone)
+    })
 })
+
+$('.input-daterange').datepicker({
+    format: 'yyyy/mm/dd',
+    language: "zh-TW",
+    endDate: '+0d',
+    datesDisabled: '+0d',
+});

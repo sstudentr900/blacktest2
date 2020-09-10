@@ -64,9 +64,14 @@ select:focus {
 
 .header .customWidth {
     display: flex;
-    padding: 20px;
+    padding: 20px 40px;
     justify-content: space-between;
     align-items: center;
+}
+
+.header .logo {
+    text-align: center;
+    width: 100%;
 }
 
 .header .logo h2 {
@@ -101,7 +106,7 @@ select:focus {
 }
 
 .backtest>div {
-    width: 24%;
+    width: 25%;
 }
 
 .backtest label {
@@ -121,31 +126,91 @@ select:focus {
     width: 70%;
 }
 
-
-/* .backtest .sheet select,
-.backtest .buyMethod select,
-.backtest .time select {
-    width: 100%;
-} */
-
-.sale {
-    width: 49%;
+.backtest .time {
+    width: 45%;
+    position: relative;
 }
 
-.sale .flex {
-    justify-content: space-between;
+.backtest .time .input-group-addon {
+    padding: 10px;
+}
+
+.backtest .time .input-daterange input {
+    text-align: left;
+    border-radius: 0;
+}
+
+.backtest .time .input-daterange>div {
+    width: 100%;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    font-size: 14px;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, .15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+}
+
+.sale {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.sale button {
+    padding: 0 10px;
+    font-size: 20px;
+    font-weight: bold;
+    /* color: #555; */
+    color: #adb5bd;
+    cursor: pointer;
+    /* background: linear-gradient(#fdfdfd, #f3f3f3); */
+    background: #fff;
+    border: 1px solid rgb(173 181 189);
+    color: #555;
+    background: rgba(131, 136, 149, .2);
+    border: none;
+    margin-left: 10px;
+}
+
+.technical button {
+    padding: 0 5px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #555;
+    background: #fff;
+    border: none;
+}
+
+.technical button:hover {
+    color: #555;
 }
 
 .technical>div {
     display: flex;
     margin-top: 10px;
     align-items: center;
-    border: 1px solid #adb5bd;
     padding: 10px 15px;
+    border: 1px solid #adb5bd;
+    position: relative;
 }
 
 .technical>div>div {
-    width: 100%;
     position: relative;
 }
 
@@ -162,27 +227,23 @@ select:focus {
     padding: 5px;
     font-size: 16px;
     text-align: center;
+    max-width: 60px;
 }
 
-
-/* .technical input {
-    width: 90px;
-} */
-
-
-/* .technical input {
-    border-bottom: 1px solid #adb5bd;
-} */
+.technical select {
+    max-width: inherit;
+}
 
 .technical>div>.ch {
     flex: 0 0 20px;
+    margin-right: 15px;
 }
 
 .technical>div>.ch input {
     width: auto;
 }
 
-.technical .error {
+.error {
     position: absolute;
     padding: 2px 5px;
     background: red;
@@ -210,27 +271,6 @@ select:focus {
     line-height: 29px;
 }
 
-.technical .column_day span.text {
-    width: 110px;
-    margin-left: 10px;
-}
-
-.technical .rsi_day span,
-.technical .kd_day span {
-    width: 115px;
-}
-
-
-/* .technical .kd .kd_day_span {
-    flex: 0 0 56px;
-    margin-right: -20px;
-}
-
-.technical .kd .kd_day_span2 {
-    flex: 0 0 10px;
-    margin-right: -20px;
-} */
-
 .technical .kd .kd_many_day_span,
 .technical .ma .ma_many_day_span,
 .technical .price .price_many_day_span,
@@ -238,50 +278,98 @@ select:focus {
     flex: 0 0 15px;
 }
 
-
-/* .technical .rsi .rsi_day_span {
-    flex: 0 0 90px;
-} */
-
 .technical .ma select {
     min-width: 60px;
 }
 
-.technical .ma .ma_day {
-    width: 180px;
-}
-
 .technical .ma .ma_day_span {
     flex: 0 0 65px;
-    margin-left: 20px;
 }
 
 .technical .ma .ma_day_span2 {
     flex: 0 0 65px;
+    margin-left: 0;
 }
 
-.technical .price .price_up_Select {
-    min-width: 150px;
+.technical .ma .ma_up {
+    margin-left: 0;
 }
 
 .technical .price .price_day_span {
     flex: 0 0 65px;
-    /* margin-right: -10px */
 }
 
 .technical .price .price_many_span {
     flex: 0 0 35px;
 }
 
-
-/* .technical .price .price_day,
-.technical .price .price_number {
-    width: 180px;
-} */
-
 .technical .price .price_number_span {
     flex: 0 0 30px;
-    /* margin-right: -10px */
+}
+
+.technical .de {
+    display: flex;
+    justify-content: flex-end;
+    position: absolute;
+    right: 15px;
+}
+
+.technical .de button {
+    font-size: 28px;
+}
+
+.technology {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, .5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    display: none;
+}
+
+.technology .technical {
+    width: 800px;
+    background: #fff;
+    padding: 60px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.technology .technical .link {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0;
+    padding: 0;
+    border: none;
+}
+
+.technology .technical .link button {
+    width: 49%;
+    border: none;
+    color: #fff;
+    background-color: #42495f;
+    padding: 15px 0;
+    border-radius: 0;
+    cursor: pointer;
+    margin-top: 20px;
+    font-size: 14px;
+    border: 1px solid #fff;
+}
+
+.technology .technical .link button.close {
+    background-color: #fff;
+    border: 1px solid #42495f;
+    color: #42495f;
+}
+
+.technology .technical .link button.close:hover {
+    background-color: #42495f;
+    color: #fff;
+    border: 1px solid #fff;
 }
 
 .starBacktestDiv {

@@ -8,6 +8,7 @@ from flask import  (
     url_for,
     make_response,
 )
+# from flask_cors import CORS
 import json
 from datetime import datetime
 from fun.custom import (
@@ -30,8 +31,9 @@ cur = conn.cursor()
 #優先
 
 app= Flask(__name__, static_url_path='/static')
-app.config['DEBUG'] =True
+app.config['DEBUG'] =True #是否開始除錯模式
 app.config["JSON_AS_ASCII"] = False
+# CORS(app) 
 
 @app.route('/about')
 def about():
@@ -88,7 +90,7 @@ def bargain(id):
   sql = "SELECT conditions FROM public.rank WHERE id=%d" % (id)
   cur.execute(sql)
   count = cur.rowcount #查找到數量
-  jsonValue = jsonify({'result': 'false','messae':'找不到資料'}) 
+  jsonValue = jsonify({'result': False,'messae':'找不到資料'}) 
   if count>=1:
     dataValue = cur.fetchone()[0]
     todayTime = datetime.today().strftime("%Y/%m/%d")
@@ -104,7 +106,7 @@ def bargain(id):
     if todayTime == sellTime:
         text = '股號:%s;日期:%s;建議可%s' % (dataValue['stock'],todayTime,sellDatas['title'])
     # print(buyTime,sellTime,todayTime)
-    jsonValue = jsonify({'result': 'true','message':text}) 
+    jsonValue = jsonify({'result': True,'message':text}) 
   return jsonValue
 @app.route('/index_save',methods=['POST'])
 def index_save():

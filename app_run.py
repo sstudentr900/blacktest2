@@ -88,6 +88,7 @@ def bargain(id):
   sql = "SELECT conditions FROM public.rank WHERE id=%d" % (id)
   cur.execute(sql)
   count = cur.rowcount #查找到數量
+  jsonValue = jsonify({'result': 'false','messae':'找不到資料'}) 
   if count>=1:
     dataValue = cur.fetchone()[0]
     todayTime = datetime.today().strftime("%Y/%m/%d")
@@ -97,13 +98,14 @@ def bargain(id):
     sellDatas = jsonValue['imgPoints']['flags']['sell'].pop()
     buyTime = datetime.utcfromtimestamp(float(buyDatas['x'])/1000.0).strftime('%Y/%m/%d')
     sellTime = datetime.utcfromtimestamp(float(sellDatas['x'])/1000.0).strftime('%Y/%m/%d')
-    text = '今天沒有買賣點'
+    text = '股號:%s;日期:%s;%s' % (dataValue['stock'],todayTime,'今天沒有買賣點')
     if todayTime == buyTime:
         text = '股號:%s;日期:%s;建議可%s' % (dataValue['stock'],todayTime,buyDatas['title'])
     if todayTime == sellTime:
         text = '股號:%s;日期:%s;建議可%s' % (dataValue['stock'],todayTime,sellDatas['title'])
     # print(buyTime,sellTime,todayTime)
-    return text
+    jsonValue = jsonify({'result': 'true','message':text}) 
+  return jsonValue
 @app.route('/index_save',methods=['POST'])
 def index_save():
   data = json.loads(request.get_data())

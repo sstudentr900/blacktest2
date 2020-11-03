@@ -9,12 +9,14 @@ from flask import  (
     make_response,
 )
 import json
+from datetime import datetime
 from fun.custom import (
   # crawlData,
   # jsonData,
   # saleFn,
   index_send_Fn,
 )
+
 import psycopg2
 conn=psycopg2.connect(database='ddfcmko4fd6ghb',user='mcaeityvstcljq',password='72964581f46309cce56e649677be3c0148e1ee7d86b5d0d9901dca9c4f251988',host='ec2-34-232-24-202.compute-1.amazonaws.com',port='5432')
 cur = conn.cursor()
@@ -81,6 +83,27 @@ def index_id(id):
     return render_template('index.html',jsonvalue= jsonValue)
   else:
     return redirect(url_for('index'))
+@app.route("/bargain/<int:id>", methods=['GET'])
+def bargain(id):
+  sql = "SELECT conditions FROM public.rank WHERE id=%d" % (id)
+  cur.execute(sql)
+  count = cur.rowcount #查找到數量
+  if count>=1:
+    dataValue = cur.fetchone()[0]
+    todayTime = datetime.today().strftime("%Y/%m/%d")
+    dataValue['timeEnd']= todayTime
+    jsonValue = index_send_Fn(jsons=dataValue)
+    buyDatas = jsonValue['imgPoints']['flags']['buy'].pop()
+    sellDatas = jsonValue['imgPoints']['flags']['sell'].pop()
+    buyTime = datetime.utcfromtimestamp(float(buyDatas['x'])/1000.0).strftime('%Y/%m/%d')
+    sellTime = datetime.utcfromtimestamp(float(sellDatas['x'])/1000.0).strftime('%Y/%m/%d')
+    text = '今天沒有買賣點'
+    if todayTime == buyTime:
+        text = '股號:%s;日期:%s;建議可%s' % (dataValue['stock'],todayTime,buyDatas['title'])
+    if todayTime == sellTime:
+        text = '股號:%s;日期:%s;建議可%s' % (dataValue['stock'],todayTime,sellDatas['title'])
+    # print(buyTime,sellTime,todayTime)
+    return text
 @app.route('/index_save',methods=['POST'])
 def index_save():
   data = json.loads(request.get_data())

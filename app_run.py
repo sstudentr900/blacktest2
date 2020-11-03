@@ -90,7 +90,7 @@ def bargain(id):
   sql = "SELECT conditions FROM public.rank WHERE id=%d" % (id)
   cur.execute(sql)
   count = cur.rowcount #查找到數量
-  jsonValue = jsonify({'result': False,'messae':'找不到資料'}) 
+  jsonValue = jsonify({'result': False,'message':'找不到資料'}) 
   if count>=1:
     dataValue = cur.fetchone()[0]
     todayTime = datetime.today().strftime("%Y/%m/%d")

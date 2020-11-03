@@ -64,14 +64,14 @@ select:focus {
 
 .header .customWidth {
     display: flex;
-    padding: 20px 40px;
+    padding: 20px;
     justify-content: space-between;
     align-items: center;
 }
 
 .header .logo {
     text-align: center;
-    width: 100%;
+    width: 120px;
 }
 
 .header .logo h2 {
@@ -214,9 +214,10 @@ select:focus {
     position: relative;
 }
 
-.technical>div>div+div {
+
+/* .technical>div>div+div {
     margin-left: 10px;
-}
+} */
 
 .technical select,
 .technical input {
@@ -227,7 +228,7 @@ select:focus {
     padding: 5px;
     font-size: 16px;
     text-align: center;
-    max-width: 60px;
+    max-width: 55px;
 }
 
 .technical select {
@@ -273,8 +274,8 @@ select:focus {
 
 .technical .kd .kd_many_day_span,
 .technical .ma .ma_many_day_span,
-.technical .price .price_many_day_span,
-.technical .rsi .rsi_many_day_span {
+.technical .price .price_many_day_span {
+    /* .technical .rsi .rsi_many_day_span { */
     flex: 0 0 15px;
 }
 
@@ -454,4 +455,55 @@ select:focus {
 #container .formatData {
     color: #fff;
     padding: 5px;
+}
+
+
+/* ranking */
+
+#ranking {
+    margin: 60px auto;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+#ranking h2 {
+    width: 100%;
+    font-size: 36px;
+    text-align: center;
+}
+
+#ranking .table {
+    border: 1px solid #adb5bd;
+    width: 1200px;
+    margin: 40px 20px;
+}
+
+#ranking .table>ul {
+    display: flex;
+    justify-content: space-between;
+}
+
+#ranking .table>ul>li {
+    width: 10%;
+    padding: 20px;
+    border-bottom: 1px solid #adb5bd;
+    word-break: break-all;
+}
+
+#ranking .table>ul>li button {
+    padding: 4px 12px;
+}
+
+#ranking .table>ul>li button:last-child {
+    margin-top: 5px;
+}
+
+#ranking .table>ul:last-child>li {
+    border-bottom: none;
+}
+
+#ranking .table>ul>li:nth-child(5),
+#ranking .table>ul>li:nth-child(6) {
+    width: 20%;
 }

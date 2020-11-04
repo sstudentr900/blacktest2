@@ -90,10 +90,11 @@ def bargain(id):
   sql = "SELECT conditions FROM public.rank WHERE id=%d" % (id)
   cur.execute(sql)
   count = cur.rowcount #查找到數量
-  jsonValue = jsonify({'result': False,'message':'找不到資料'}) 
+  jsonifyValue = jsonify({'result': False,'message':'找不到資料'}) 
   if count>=1:
     dataValue = cur.fetchone()[0]
     todayTime = datetime.today().strftime("%Y/%m/%d")
+    # todayTime = '2020/07/14'
     dataValue['timeEnd']= todayTime
     jsonValue = index_send_Fn(jsons=dataValue)
     buyDatas = jsonValue['imgPoints']['flags']['buy'].pop()
@@ -106,8 +107,8 @@ def bargain(id):
     if todayTime == sellTime:
         text = '股號:%s;日期:%s;建議可%s' % (dataValue['stock'],todayTime,sellDatas['title'])
     # print(buyTime,sellTime,todayTime)
-    jsonValue = jsonify({'result': True,'message':text}) 
-  return jsonValue
+    jsonifyValue = jsonify({'result': True,'message':text}) 
+  return jsonifyValue
 @app.route('/index_save',methods=['POST'])
 def index_save():
   data = json.loads(request.get_data())

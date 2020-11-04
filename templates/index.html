@@ -1778,14 +1778,47 @@
         var parent = o.parent
         var parentHtml = parent.cloneNode(true)
         parentHtml.querySelector('.ch').remove();
-        //select  select會掉index
-        parent.querySelectorAll('select').forEach((o) => {
-            parentHtml.querySelectorAll('select').forEach((i) => {
-                if (o.className == i.className) {
-                    i[o.selectedIndex].selected = true;
-                }
+
+        // //have data
+        var data = o.data ? o.data : ''
+        if (data) {
+            parentHtml.querySelectorAll('input').forEach((o) => {
+                o.value = data[o.name]
+                    // console.log(o.name, data)
             })
-        });
+            parentHtml.querySelectorAll('select').forEach((o) => {
+                //kd_up=>up_d low_d
+                if (data[o.name] == 'up_d' || data[o.name] == 'low_d') {
+                    parentHtml.querySelector('.kd_v').remove()
+                }
+                //many
+                if (o.name == 'many' && data[o.name] == 'y') {
+                    var many_day = document.createElement('div')
+                    many_day.classList.add('many_day')
+                    var span = document.createElement('span')
+                    span.innerText = '日'
+                    var input = document.createElement('input')
+                    input.setAttribute('type', 'number')
+                    input.setAttribute('name', 'many_day')
+                    input.setAttribute('min', '1')
+                    input.setAttribute('value', data['many_day'])
+                    many_day.append(input, span)
+                    parentHtml.querySelector('.many_select').after(many_day)
+                }
+                o.value = data[o.name]
+                    // console.log(o.name)
+            })
+        } else {
+            //select  select會掉index
+            parent.querySelectorAll('select').forEach((o) => {
+                parentHtml.querySelectorAll('select').forEach((i) => {
+                    if (o.className == i.className) {
+                        i[o.selectedIndex].selected = true;
+                    }
+                })
+            });
+        }
+
         //deDiv
         var deDiv = document.createElement('div');
         deDiv.classList.add('de');
@@ -1800,6 +1833,7 @@
         return parentHtml
     }
 
+
     //showCondition
     function showCondition(o) {
         var data = o.data
@@ -1812,6 +1846,7 @@
                 if (ch.className == formBuy.ch) {
                     var buyHtml = conditionHtml({
                         'parent': ch,
+                        'data': formBuy
                     })
                     document.querySelector('.sale.buy .technical').append(buyHtml)
                 }
@@ -1820,6 +1855,7 @@
                 if (ch.className == formBuy.ch) {
                     var sellHtml = conditionHtml({
                         'parent': ch,
+                        'data': formBuy
                     })
                     document.querySelector('.sale.sell .technical').append(sellHtml)
                 }
@@ -1888,6 +1924,7 @@
                 a: fromObj
             }).then(function(data) {
                 if (data.result == 'true') {
+                    console.log(data)
                     showTable({
                         'data': data,
                         'formData': fromObj,
@@ -1986,7 +2023,8 @@
 
     //有資料
     if (typeof(datas) == 'object') {
-        //股號 買入方式 回測時間
+        console.log(datas)
+            //股號 買入方式 回測時間
         var selects = document.querySelectorAll('.backtest select,.backtest input')
         selects.forEach(select => {
             select.value = datas[select.name]

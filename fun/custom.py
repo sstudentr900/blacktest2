@@ -1,7 +1,3 @@
-# # import flask
-# from flask import  (
-#     jsonify,
-# )
 #時間範圍
 import datetime,calendar
 #撈股票價格
@@ -11,19 +7,64 @@ import numpy as np
 # #处理结构化的表格数据
 import pandas as pd
 #撈股票
-def crawlData(stock, timeStart, timeEnd):
-    try:
-        #時間範圍
-        # cur=datetime.datetime.now()
-        # startYear = cur.year-int(crawlTime)
-        # start = datetime.datetime(startYear, cur.month, cur.day)
-        # end = datetime.datetime(cur.year, cur.month, cur.day)
-        #撈股票價格
-        # df = pdr.DataReader(stock+'.TW', 'yahoo', start, end)
-        df = pdr.DataReader(stock + '.TW', 'yahoo', timeStart, timeEnd)
+def crawlData(obj):
+    #股號
+    stock= '2330'
+    if obj['json'].get('stock'):
+        stock= obj['json'].get('stock')
+    else:
+        obj['json']['stock'] = stock   
+
+    #時間範圍
+    cur=datetime.datetime.now()
+    startYear = cur.year-int(3)
+    timeStart=  datetime.datetime(startYear, cur.month, cur.day)
+    if obj['json'].get('timeStart'):
+        timeStart= obj['json'].get('timeStart')
+    else:
+        obj['json']['timeStart'] = timeStart   
+
+    timeEnd=  datetime.datetime(cur.year, cur.month, cur.day)
+    if obj['json'].get('timeEnd'):
+        timeEnd= obj['json'].get('timeEnd')
+    else:
+        obj['json']['timeEnd'] = timeEnd    
+
+
+    #撈股票價格
+    df = pdr.DataReader(stock + '.TW', 'yahoo', timeStart, timeEnd)
+
+    if len(df):
+        #K線
+        kLine= 'd'
+        if obj['json'].get('kLine'):
+            kLine= obj['json'].get('kLine')
+        else:
+            obj['json']['kLine'] = kLine
+
+        #日K轉周月年K線
+        if kLine in ['w','m','y']:
+            transdat = df.loc[:,["Open", "High", "Low", "Close","Volume"]]
+            if kLine=='w':
+                transdat["w"]= transdat.index.format(formatter=lambda x: x.strftime("%U"))
+            if kLine=='m':
+                transdat["m"]= transdat.index.format(formatter=lambda x: x.strftime("%m"))
+            transdat["y"]= transdat.index.format(formatter=lambda x: x.strftime("%Y"))
+            # print(transdat.head(520))
+            grouped = transdat.groupby(['y',kLine])
+            # print(grouped.groups)     
+            df = pd.DataFrame({"Open": [], "High": [], "Low": [], "Close": [],"Volume":[]})
+            for name, group in grouped:
+                # print(name,group)
+                df = df.append(pd.DataFrame({
+                    "Open": group.iloc[0,0],
+                    "High": max(group.High),
+                    "Low": min(group.Low),
+                    "Close": group.iloc[-1,3],
+                    "Volume": sum(group.Volume)},
+                    index = [group.index[0]]))
+
         #date
-        # df.index = df.index.format(formatter=lambda x: x.strftime("%Y-%m-%d %H:%M:%S"))
-        # df['date'] = [datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").date() for d in df.index]
         df['date'] = [
             datetime.datetime.strptime(str(d), "%Y-%m-%d %H:%M:%S")
             for d in df.index
@@ -32,19 +73,16 @@ def crawlData(stock, timeStart, timeEnd):
             calendar.timegm(d.utctimetuple()) * 1000.0 +
             d.microsecond * 0.0011383651000000 for d in df.date
         ]
-        # df['date2'] = [d.strftime("%Y-%m-%d") for d in df.index]
+
+        #index 轉 日期
         df.index = df.index.format(formatter=lambda x: x.strftime("%Y-%m-%d"))
-        # df['date4'] = df.index.format(formatter=lambda x: x.strftime("%Y-%m-%d"))
-        # df.index = df.index.format(formatter=lambda x: x.strftime('%Y-%m-%d'))
-        return df
-    except:
-        return []
+    # print(df.tail(50))
+    return df
 def maLine(obj, day):
     maDay = int(day)
     maName = str(maDay) + '_day'
     if maName not in obj['df']:
-        obj['df'][maName] = np.round(
-            pd.Series(obj['df']['Close'].rolling(window=maDay).mean()), 2)
+        obj['df'][maName] = pd.Series(np.round(obj['df']['Close'].rolling(window=maDay).mean(),decimals=2))
         maData = obj['df'][['date', maName]].dropna().values.tolist()
         maData = {'method': 'ma', 'name': maDay, 'data': maData}
         # obj['maData'][obj['saletext']].append(maData)
@@ -57,37 +95,62 @@ def profitFn(close, close2):
     return profit, reward    
 def se_fn(json,l=0,s=0,l2=0,s2=0):
     result = False
+    # print(json['se'],l,s)
     if json['se'] == 'up' and l >= s or json['se'] == 'low' and l <= s:
         if l2!=0 and s2!=0:
             if json['se'] == 'up' and l2 <= s2 or json['se'] == 'low' and l2 >= s2:
                 result=True
         else:
             result=True        
-    return result     
+    return result       
 def many_fn(obj,json,ma,vv,vt):   
     ni = obj['nowIndex']  
     if ni + 1 > ma:
         obj['many_day'] = 0
-        many_day = 1
+        many_day = 1 
         #連續天數
-        if json['many'] == 'y':
+        if 'many_day' in json:
             many_day = int(json['many_day'])
+        # print(json)    
         for mi in range(many_day):
             ni2 = ni - mi
-            l = float(vv[ni2])
-            s = float(vt[ni2])
+            l = vv if type(vv)==float else float(vv[ni2])    
+            s = vt if type(vt)==float else float(vt[ni2])        
             l2 = 0
             s2 = 0
+            # print(obj['df'].index[ni2])          
             #起漲
-            if json['rise']=='y':
-                ni3 = ni - many_day
-                l2 = float(vv[ni3])
-                s2 = float(vt[ni3])
+            if 'rise' in json and json['rise']=='y':
+                rise_day = ni - many_day 
+                s2 = vt if type(vt)==float else float(vt[rise_day])    
+                l2 = vv if type(vv)==float else float(vv[rise_day])    
+            # print(obj['df'].index[ni2],'cl=',l,'60=',s,'md=',l2,'60t=',s2,'rise_day=',rise_day,'ni=',ni,'ni2=',ni2)          
             if se_fn(json=json,l=l,s=s,l2=l2,s2=s2):
                 obj['many_day'] += 1
+    
         #是否符合        
         if many_day == obj['many_day']:
-            obj['condition'].append(json)
+            #連續高
+            result = True
+            if json['ch']=='price4':
+                star = ni-many_day+1
+                last = ni+1
+                vvs = vv[star:last]
+                # vvsn = vv[ni]
+                # vvss = vv[star]
+                # vvsl = vv[last]
+                # print(vvsn,vvss,vvsl)
+                # print(vvs)
+                for i in range(0,len(vvs)-1):
+                    # print(i,vvs[i],vvs[i+1],vvs)
+                    if json['se'] == 'up' :
+                        if vvs[i]>vvs[i+1]:
+                            result = False
+                    elif json['se'] == 'low':
+                        if vvs[i]<vvs[i+1]:
+                            result = False
+            if result:
+                obj['condition'].append(json)
     return obj            
 def ma(obj, json):
     #建立均線
@@ -109,32 +172,45 @@ def price(obj, json):
     vt = obj['df'][text]
     return many_fn(obj=obj,json=json,ma=ma,vv=vv,vt=vt)
 def price2(obj, json):
-    # reply = False
-    if json['many'] == 'y':
-        obj['many_day'] = 0
-        many_day = int(json['many_day'])
+    obj['many_day'] = 0
+    many_day = int(json['many_day'])
+    if obj['nowIndex']>0:
+        for mi in range(many_day):
+            ni = obj['nowIndex'] - mi
+            close = float(obj['df'].Close[ni])
+            close2 = float(obj['df'].Close[ni-1])
+            profit, reward = profitFn(close, close2)
+            number = float(json['number'])
+            # print(obj['df'].index[ni],close,Open,number,reward)
+            if json['se'] == 'up' and reward >= number or json['se'] == 'low' and number * -1 >= reward:
+                obj['many_day'] += 1
+    if many_day == obj['many_day']:
+        obj['condition'].append(json)
+    return obj    
+def price3(obj, json):
+    obj['many_day'] = 0
+    many_day = int(json['many_day'])
+    if obj['nowIndex']>0:
         for mi in range(many_day):
             ni = obj['nowIndex'] - mi
             close = float(obj['df'].Close[ni])
             Open = float(obj['df'].Open[ni])
             profit, reward = profitFn(close, Open)
-            if json['se'] == 'up' and reward >= int(json['number']) or json['se'] == 'low' and int(json['number']) * -1 >= reward:
+            number = float(json['number'])
+            if json['se'] == 'up' and reward >= number or json['se'] == 'low' and round(number * -1,10) >= reward:
                 obj['many_day'] += 1
-        if many_day == obj['many_day']:
-            # reply = True
-            obj['condition'].append(json)
-    if json['many'] == 'n':
-        ni = obj['nowIndex']
-        close = float(obj['df'].Close[ni])
-        Open = float(obj['df'].Open[ni])
-        profit, reward = profitFn(close, Open)
-        if json['se'] == 'up' and reward >= int(json['number']) or json['se'] == 'low' and int(json['number']) * -1 >= reward:
-            # reply = True
-            obj['condition'].append(json)
-    # #非優先    
-    # if reply:
-    #     obj['condition'].append(json)        
-    return obj    
+    if many_day == obj['many_day']:
+        obj['condition'].append(json)
+    return obj   
+def price4(obj, json):
+    #建立均線
+    day = int(json['day'])
+    ma, text, obj = maLine(obj=obj, day=day)
+    #大於均線天數
+    # ni = obj['nowIndex']
+    vv = obj['df'].Close
+    vt = obj['df'][text]
+    return many_fn(obj=obj,json=json,ma=ma,vv=vv,vt=vt)         
 def column_maData(obj,maTexts):
     for v in maTexts: 
         text = v['text'] 
@@ -189,6 +265,29 @@ def column2(obj, json):
     vv = obj['df'][text]
     vt = obj['df'][text2]
     return many_fn(obj=obj,json=json,ma=ma,vv=vv,vt=vt)
+def profit(obj, json):
+    # print(obj['df']['Close'])
+    # print( obj['average'])
+    close = obj['df']['Close'][obj['nowIndex']]
+    obj['profitrang'].append(close)
+    value = int(json['v'])
+    if len(obj['profitrang'])>=2:
+        # firstClose = obj['profitrang'][0]
+        maxClose = max(obj['profitrang'])
+        maxIndex = obj['profitrang'].index(maxClose)
+        # minClose = min(obj['profitrang'])
+        # stopClose = firstClose + (maxClose-firstClose)*(value*0.01)
+        stopClose = maxClose*(1-(value/100))
+        # print(obj['df'].index[obj['nowIndex']],'maxClose',maxClose,'stopClose',stopClose,'profitrang',obj['profitrang'])
+        for i in range(maxIndex,len(obj['profitrang'])):
+            nowClose = obj['profitrang'][i]
+            # print('i',i,stopClose,nowClose,stopClose>=nowClose)
+            # print(stopClose,obj['profitrang'][i])
+            if stopClose>=nowClose:
+                obj['profitrang'].clear()
+                obj['condition'].append(json)
+                break
+    return obj   
 def rsi(obj, json):
     day = int(json['day'])
     rsiTexts = json['day'] + 'rsi'
@@ -211,11 +310,10 @@ def rsi(obj, json):
         ema_D = D.ewm(span=day).mean()
         RS = ema_U.div(ema_D)
         obj['df'][rsiTexts] = round(RS.apply(lambda rs: rs / (1 + rs) * 100),2)
-        obj['df'][rsiValue] = int(json['v'])
         rsiData = obj['df'][['date', rsiTexts]].dropna().values.tolist()
         rsiData = {'method': 'rsi', 'name': day, 'data': rsiData}
-        # obj['maData'][obj['saletext']].append(rsiData)
         obj['linegraph'].append(rsiData)
+    obj['df'][rsiValue] = int(json['v'])    
     vv = obj['df'][rsiTexts]
     vt = obj['df'][rsiValue]
     return many_fn(obj=obj,json=json,ma=day,vv=vv,vt=vt)
@@ -303,50 +401,200 @@ def kd(obj, json):
         # obj['maData'][obj['saletext']].append(maData)
         obj['linegraph'].append(maData)
     if obj['nowIndex'] >= day:
-        #連續幾天
-        if json['many'] == 'y':
-            obj['many_day'] = 0
+        obj['many_day'] = 0
+        many_day = 1 
+        #連續天數
+        if 'many_day' in json:
             many_day = int(json['many_day'])
-            for mi in range(many_day):
-                ni = obj['nowIndex'] - mi
-                kTextV = obj['df'][kText][ni]
-                dTextV = obj['df'][dText][ni]
-                if json['se'] == 'up' and kTextV >= value or json['se'] == 'low' and kTextV <= value or json['se']=='up_d' and kTextV >= dTextV or json['se'] == 'low_d' and kTextV <= dTextV:
-                    #起漲點
-                    if json['rise']=='y':
-                        ni2 = obj['nowIndex']-many_day
-                        kTextV2 = obj['df'][kText][ni2]
-                        dTextV2 = obj['df'][dText][ni2]
-                        if json['se'] == 'up' and kTextV2 <= value or json['se'] == 'low' and kTextV2 >= value or json['se'] == 'up_d' and kTextV2 <= dTextV2 or json['se'] == 'low_d' and kTextV2 >= dTextV2:
-                            obj['many_day'] += 1
-                    else:     
-                        obj['many_day'] += 1
-            if many_day == obj['many_day']:
-                reply = True
-                # obj['condition'].append(json)
-        #不連續幾天
-        if json['many'] == 'n':
-            ni = obj['nowIndex']
+        for mi in range(many_day):
+            ni = obj['nowIndex'] - mi
             kTextV = obj['df'][kText][ni]
             dTextV = obj['df'][dText][ni]
-            if json['se'] == 'up' and kTextV >= value or json[ 'se'] == 'low' and kTextV <= value or json['se'] == 'up_d' and kTextV >= dTextV or json['se'] == 'low_d' and kTextV <= dTextV:
+            if json['se'] == 'up' and kTextV >= value or json['se'] == 'low' and kTextV <= value or json['se']=='up_d' and kTextV >= dTextV or json['se'] == 'low_d' and kTextV <= dTextV:
                 #起漲點
                 if json['rise']=='y':
-                    ni2 = obj['nowIndex']-1
+                    ni2 = obj['nowIndex']-many_day
                     kTextV2 = obj['df'][kText][ni2]
                     dTextV2 = obj['df'][dText][ni2]
                     if json['se'] == 'up' and kTextV2 <= value or json['se'] == 'low' and kTextV2 >= value or json['se'] == 'up_d' and kTextV2 <= dTextV2 or json['se'] == 'low_d' and kTextV2 >= dTextV2:
-                        reply = True
-                        # obj['condition'].append(json)
-                else: 
-                    reply = True    
-                    # obj['condition'].append(json)
+                        obj['many_day'] += 1
+                else:     
+                    obj['many_day'] += 1
+        if many_day == obj['many_day']:
+            reply = True
         #非優先    
         if reply:
-        # if reply or json['need']=='n':
             obj['condition'].append(json)
 
     return obj
+def macdData(obj, json):
+    day = int(json['day'])
+    fastDay = int(json['fast'])
+    slowDay = int(json['slow'])
+    jsonText = json['day']+json['fast']+json['slow']
+    macdLineText =  jsonText + 'macdLine'
+    signalLineText =  jsonText + 'signalLine'
+    histogramText = jsonText + 'histogram'
+    if macdLineText not in obj['df']:
+        fasts = obj['df']['Close'].ewm(span=fastDay, adjust=False).mean()
+        slow = obj['df']['Close'].ewm(span=slowDay, adjust=False).mean()
+        macdLine = fasts-slow
+        signalLine = macdLine.ewm(span=day, adjust=False).mean()
+        histogram = macdLine-signalLine
+        obj['df'][macdLineText] = round(macdLine,1)
+        obj['df'][signalLineText] = round(signalLine,1)
+        obj['df'][histogramText] = round(histogram,1)
+        ml = obj['df'][['date', macdLineText]].dropna().values.tolist()
+        sl = obj['df'][['date', signalLineText]].dropna().values.tolist()
+        hist = obj['df'][['date', histogramText]].dropna().values.tolist()
+        # print(obj['df'],hist)    
+        data = {
+            'method': 'macd',
+            'name': day,
+            'data': {
+                'ml': ml,#快線
+                'sl': sl,#慢線
+                'hist': hist
+            }
+        }
+        obj['linegraph'].append(data)
+    return obj,slowDay,jsonText 
+def macd(obj, json):
+    obj,slowDay,jsonText= macdData(obj, json)
+    macdLineText =  jsonText + 'macdLine'
+    signalLineText =  jsonText + 'signalLine'
+    vv = obj['df'][macdLineText]
+    vt = obj['df'][signalLineText]
+    return many_fn(obj=obj,json=json,ma=slowDay,vv=vv,vt=vt)    
+def macd2(obj, json):
+    obj,slowDay,jsonText= macdData(obj, json)
+    macdLineText =  jsonText + 'macdLine'
+    signalLineText =  jsonText + 'signalLine'
+    #高低值
+    vt = float(json['v'])
+    #轉負數
+    if json['se'] == 'low':
+        vt =  vt * -1
+
+    #快慢線
+    vv = obj['df'][macdLineText]
+    if json['line'] == 'slow':
+        vv = obj['df'][signalLineText]
+
+    return many_fn(obj=obj,json=json,ma=slowDay,vv=vv,vt=vt)    
+def bband(obj, json):
+    reply = False
+    value = float(json['v'])
+    day = int(json['day'])
+    bbText =  '%sbb_%s' % (day, value)
+    bbUtext= '%s_u' % bbText
+    bbMtext= '%s_m' % bbText
+    bbDtext= '%s_d' % bbText
+    bbStext= '%s_s' % bbText
+    if bbUtext not in obj['df']:
+        #https://aboutfutures.wordpress.com/2018/10/31/%E7%94%A8%E5%B8%83%E6%9E%97%E9%80%9A%E9%81%93%E4%BA%A4%E6%98%93%E5%8F%B0%E7%81%A350/
+        bbU= pd.Series(0,index=obj['df'].index)
+        bbM= pd.Series(0,index=obj['df'].index)
+        bbD= pd.Series(0,index=obj['df'].index)
+        bbS= pd.Series(0,index=obj['df'].index)
+        for i in range(day-1,len(obj['df'])):
+            bbM[i]=np.nanmean(obj['df']['Close'][i-(day-1):(i+1)])
+            bbS[i]=np.nanstd(obj['df']['Close'][i-(day-1):(i+1)])
+            bbU[i]=round(bbM[i]+value*bbS[i],10)
+            bbD[i]=round(bbM[i]-value*bbS[i],10)
+        obj['df'][bbUtext] = bbU   
+        obj['df'][bbMtext] = bbM   
+        obj['df'][bbDtext] = bbD  
+        # obj['df'][bbStext] = bbS    
+        bbDataU = obj['df'][['date', bbUtext]].dropna().values.tolist()
+        bbDataM = obj['df'][['date', bbMtext]].dropna().values.tolist()
+        bbDataD = obj['df'][['date', bbDtext]].dropna().values.tolist()
+        bbData = {
+            'method': 'bband',
+            'name': day,
+            'value': value,
+            'data': {
+                'm': bbDataM,
+                'u': bbDataU,
+                'd': bbDataD
+            }
+        }
+        obj['linegraph'].append(bbData)
+    # print(obj['df'])
+    if obj['nowIndex'] >= day:
+        obj['many_day'] = 0
+        many_day = int(json['many_day'])#連續天數
+        for mi in range(many_day):
+            ni = obj['nowIndex'] - mi
+            bbUV = obj['df'][bbUtext][ni]
+            bbMV = obj['df'][bbMtext][ni]
+            bbDV = obj['df'][bbDtext][ni]
+            close = obj['df']['Close'][ni]
+            # print(obj['df'].index[ni],'se',json['se'],'line',json['line'],close >= bbUV,'nowIndex',obj['nowIndex'],ni)  
+            if json['se'] == 'up' and json['line'] == 'up' and close >= bbUV or json['se'] == 'up' and json['line'] == 'mi' and close >= bbMV or json['se'] == 'up' and json['line'] == 'low' and close >=  bbDV or json['se'] == 'low' and json['line'] == 'up' and close <= bbUV or json['se'] == 'low' and json['line'] == 'mi' and close <=  bbMV or json['se'] == 'low' and json['line'] == 'low' and close <= bbDV:
+                #起漲點
+                if json['rise']=='y':
+                    ni2 = obj['nowIndex']-many_day
+                    close2 = obj['df']['Close'][ni2]
+                    bbUV2 = obj['df'][bbUtext][ni2]
+                    bbMV2 = obj['df'][bbMtext][ni2]
+                    bbDV2 = obj['df'][bbDtext][ni2]
+                    # print('ni2',ni2,'close2',close2,'bbUV2',bbUV2,'bbMV2',bbMV2,'bbDV2',bbDV2)  
+                    if json['se'] == 'up' and json['line'] == 'up' and close2 <= bbUV2 or json['se'] == 'up' and json['line'] == 'mi' and close2 <= bbMV2 or json['se'] == 'up' and json['line'] == 'low' and close2 <=  bbDV2 or json['se'] == 'low' and json['line'] == 'up' and close2 >= bbUV2 or json['se'] == 'low' and json['line'] == 'mi' and close2 >=  bbMV2 or json['se'] == 'low' and json['line'] == 'low' and close2 >= bbDV2:
+                        obj['many_day'] += 1
+                else:     
+                    obj['many_day'] += 1
+                
+        if many_day == obj['many_day']:
+            reply = True
+        #非優先    
+        if reply:
+            obj['condition'].append(json)
+    return obj    
+def dc(obj, json):
+    reply = False
+    line = json['line']
+    upLine = int(json['upLine'])
+    lowLine = int(json['lowLine'])
+    dcText =  'dc%s%s' % (upLine, lowLine)
+    dcHText= '%s_h' % dcText
+    dcLText= '%s_l' % dcText
+    dcMText= '%s_m' % dcText
+    if dcHText not in obj['df']:
+        #n天
+        hightDay = upLine  
+        lowDay = lowLine
+        #最高價
+        obj['df'][dcHText]=  obj['df']['High'].rolling(window=hightDay).max().shift(1)
+        #最低價
+        obj['df'][dcLText] = obj['df']['Low'].rolling(window=lowDay).min().shift(1)
+        #中線
+        obj['df'][dcMText] = (obj['df'][dcHText]+obj['df'][dcLText])/2
+        dch = obj['df'][['date', dcHText]].dropna().values.tolist()
+        dcl = obj['df'][['date', dcLText]].dropna().values.tolist()
+        dcm = obj['df'][['date', dcMText]].dropna().values.tolist()
+        dcData = {
+            'method': 'dc',
+            'hday': upLine,
+            'lday': lowLine,
+            'data': {
+                'h': dch,
+                'l': dcl,
+                'm': dcm
+            }
+        }
+        obj['linegraph'].append(dcData)
+    # print(obj['df'])   
+    # 判斷上下線
+    vv = obj['df']['Close']
+    vt = obj['df'][dcHText] 
+    if line=='mi':
+        vt = obj['df'][dcMText] 
+    elif line=='low':   
+        vt = obj['df'][dcLText]  
+    #取最多天    
+    slowDay = max((upLine,lowLine))  
+    return many_fn(obj=obj,json=json,ma=slowDay,vv=vv,vt=vt)    
 def tableDataAdd(obj,
                  buyText='買',
                  buyText2='1張',
@@ -410,10 +658,47 @@ def sellMethod(obj, buyText2='1張', profit=0, reward=0):
     #   obj = tableDataAdd(obj=obj,buyText='賣',buyText2=buyText2,profit=profit,reward=reward)
     return obj
 def saleConfirm(obj):
-    # 符和條件
-    # if len(obj['json'][obj['saletext']])==obj['condition']:
-    if obj['json'][obj['saletext']] == obj['condition']:
+    confirm = False
+    json = obj['json'][obj['saletext']]
+    condition = obj['condition']
 
+    #條件優先
+    #[1,1,2,3]
+    jsonList=[]
+    conditionList=[]
+    for name in ['json','condition']:
+        for i in eval(name):
+            # print(i)
+            value = '1'
+            if i['need']:
+                value = i['need']
+            #補錯誤Y    
+            if i['need'] == 'y':    
+                value = '1'
+            eval(name+'List').append(value)
+    # print(json,jsonList,condition,conditionList)
+
+    #最優['1','2','3']
+    for i in ['1','2','3']:
+        jsonListOne = jsonList.count(i)
+        conditionListOne = conditionList.count(i)
+        if jsonListOne and jsonListOne==conditionListOne:
+            confirm = True
+
+    # #符合其中一個
+    # conditionList=[]
+    # if sum([i=={'ch': 'condition'} for i in json]):
+    #     for i in json:
+    #         conditionList.append(sum([ci==i for ci in condition]))    
+    #     if sum(conditionList):    
+    #         confirm = True
+    # #全符合
+    # if json == condition:
+    #     confirm = True
+
+
+    #買入方式
+    if confirm:    
         #買入方式1
         if obj['json']['buyMethod'] == '1':
             if obj['saletext'] == 'buy':
@@ -479,14 +764,22 @@ def saleFn(obj):
     commands = {
         'kd': kd,
         'rsi': rsi,
+        'bband':bband,
         'price': price,
         'price2': price2,
+        'price3': price3,
+        'price4': price4,
+        'profit': profit,
         'column': column,
         'column2': column2,
+        'macd': macd,
+        'macd2': macd2,
         'ma': ma,
+        'dc': dc,
     }
     for json in obj['json'][obj['saletext']]:
         if json['ch'] in commands:
+            # print(obj['saletext'],json)
             func = commands[json['ch']]
             obj = func(obj=obj, json=json)
     return saleConfirm(obj)
@@ -523,20 +816,14 @@ def jsonData(obj):
                 'close':obj['df'][['date', 'Open', 'High', 'Low','Close']].dropna().values.tolist(),
                 'flags':obj['flagsData'],
                 'linegraph':obj['linegraph'],
-                # 'buy':
-                # obj['maData']['buy'],
-                # 'sell':
-                # obj['maData']['sell']
             }
         }
     return jsonValue
 def index_send_Fn(jsons):
-    jsonValue = {'result': 'false','errorInfo':'找不到資料'}
     obj= {
         'buySheets':0,
         'tableData':[],
         'flagsData':{'buy':[],'sell':[]},
-        # 'maData':{'buy':[],'sell':[]},
         'linegraph':[],
         'buyPlay':[],
         'buyPrice':[],
@@ -553,11 +840,13 @@ def index_send_Fn(jsons):
         'condition':0,
         'saletext':'buy',
         'nowIndex':0,
+        'profitrang':[],#停利
     }
     # print('550',jsons)
     obj['json'] = jsons
+    jsonValue = {'result': 'false','errorInfo':'找不到資料'}
     # print('552',obj['json'])
-    df=crawlData(stock=obj['json']['stock'],timeStart=obj['json']['timeStart'],timeEnd=obj['json']['timeEnd'])
+    df=crawlData(obj=obj)
     if len(df):
         obj['df']= df
         obj['stock']=obj['json']['stock']
@@ -567,7 +856,9 @@ def index_send_Fn(jsons):
             if obj['buySheets']==0 or obj['json']['buyMethod']=='2':
                 obj['saletext']='buy'
                 obj=saleFn(obj)
+                # print('buy')
             if obj['buySheets']>0 and 'sell' in obj['json']:
+                # print('sell')
                 obj['saletext']='sell'
                 obj=saleFn(obj)
         jsonValue = jsonData(obj)   

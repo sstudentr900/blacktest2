@@ -14,6 +14,17 @@
             }
             return text
         }
+        var kLineFn = function(index) {
+            var text = '日K線'
+            if (index == 'd') {
+                text = '日K線'
+            } else if (index == 'w') {
+                text = '周K線'
+            } else if (index == 'm') {
+                text = '月K線'
+            }
+            return text
+        }
         var operatingFn = function(index) {
             var div = document.createElement('div')
             var button = document.createElement('button')
@@ -53,6 +64,9 @@
             var sefn = function(params) {
                 return params == 'low' ? '低於' : '高於'
             }
+            var prSefn = function(params) {
+                return params == 'low' ? '跌破' : '漲破'
+            }
             var kdsefn = function(item) {
                 var se = item.se
                 var text = '低於D值'
@@ -65,6 +79,40 @@
                 }
                 return text
             }
+            var bbLineFn = function(item) {
+                var se = item.line
+                var text = '底線'
+                if (se == 'up') {
+                    text = '頂線'
+                } else if (se == 'mi') {
+                    text = '中線'
+                } else if (se == 'low') {
+                    text = '底線'
+                }
+                return text
+            }
+            var dcLineFn = function(item) {
+                var se = item.line
+                var text = '上阻線'
+                if (se == 'up') {
+                    text = '上阻線'
+                } else if (se == 'mi') {
+                    text = '中線'
+                } else if (se == 'low') {
+                    text = '下撐線'
+                }
+                return text
+            }
+            var maLineFn = function(item) {
+                var se = item.line
+                var text = '慢線'
+                if (se == 'fast') {
+                    text = '快線'
+                } else if (se == 'slow') {
+                    text = '慢線'
+                }
+                return text
+            }
             var dayfn = function(params) {
                 return params + '日'
             }
@@ -72,7 +120,7 @@
                 return item.many == 'n' ? '' : '連續' + item.many_day + '日'
             }
             var riseFn = function(params) {
-                return params == 'y' ? '在起漲點' : ''
+                return params == 'y' ? '買在起漲' : ''
             }
             var needFn = function(params) {
                 return params == 'y' ? '最優先' : '非優先'
@@ -82,25 +130,40 @@
                 items.forEach(item => {
                     if (item.ch == 'kd') {
                         // text = dayfn(item.day) + 'k值' + kdsefn(item) + manyFn(item) + riseFn(item.rise) + needFn(item.need)
-                        text.push(dayfn(item.day) + 'k值' + kdsefn(item) + manyFn(item) + riseFn(item.rise))
+                        text.push(dayfn(item.day) + 'k值' + kdsefn(item))
                     }
                     if (item.ch == 'rsi') {
-                        text.push(dayfn(item.day) + 'RSI' + sefn(item.se) + item.v + manyFn(item) + riseFn(item.rise))
+                        text.push(dayfn(item.day) + 'RSI' + sefn(item.se) + item.v)
                     }
                     if (item.ch == 'column') {
-                        text.push('成交量' + sefn(item.se) + dayfn(item.day) + manyFn(item) + riseFn(item.rise))
+                        text.push('成交量' + sefn(item.se) + dayfn(item.day))
                     }
                     if (item.ch == 'column2') {
-                        text.push('成交量' + dayfn(item.day) + '線' + sefn(item.se) + dayfn(item.day2) + '線' + manyFn(item) + riseFn(item.rise))
+                        text.push('成交量' + dayfn(item.day) + '線' + sefn(item.se) + dayfn(item.day2) + '線')
                     }
                     if (item.ch == 'ma') {
-                        text.push(dayfn(item.day) + '線' + sefn(item.se) + dayfn(item.day2) + '線' + manyFn(item) + riseFn(item.rise))
+                        text.push(dayfn(item.day) + '線' + sefn(item.se) + dayfn(item.day2) + '線')
                     }
                     if (item.ch == 'price') {
-                        text.push('收盤價' + sefn(item.se) + dayfn(item.day) + '線' + manyFn(item) + riseFn(item.rise))
+                        text.push('收盤價' + sefn(item.se) + dayfn(item.day) + '線')
                     }
                     if (item.ch == 'price2') {
-                        text.push('收盤價' + sefn(item.se) + item.number + '%' + manyFn(item))
+                        text.push('股價漲幅' + prSefn(item.se) + item.number + '%')
+                    }
+                    if (item.ch == 'price3') {
+                        text.push('開收盤漲幅' + prSefn(item.se) + item.number + '%')
+                    }
+                    if (item.ch == 'macd') {
+                        text.push(dayfn(item.day) + 'MACD' + item.fast + '日快線' + sefn(item.se) + item.slow + '日慢線')
+                    }
+                    if (item.ch == 'macd2') {
+                        text.push(dayfn(item.day) + 'MACD' + item.fast + '日快線' + sefn(item.se) + item.slow + '日慢線' + maLineFn(item.line) + sefn(item.se) + item.v)
+                    }
+                    if (item.ch == 'bband') {
+                        text.push(dayfn(item.day) + '布林' + item.v + '倍' + sefn(item.se) + bbLineFn(item.line))
+                    }
+                    if (item.ch == 'dc') {
+                        text.push('唐奇安' + item.upLine + '日上阻' + item.lowLine + '日下撐' + sefn(item.se) + dcLineFn(item.line))
                     }
                 });
             }
@@ -110,6 +173,7 @@
         var datatop = `<ul>
             <li>ID編號</li>
             <li>股票代號</li>
+            <li>回測K線</li>
             <li>買入方式</li>
             <li>回測時間</li>
             <li>進場條件</li>
@@ -130,6 +194,7 @@
             var ul = document.createElement('ul')
             var li_id = document.createElement('li')
             var li_stock = document.createElement('li')
+            var li_kline = document.createElement('li')
             var li_buyMethod = document.createElement('li')
             var li_time = document.createElement('li')
             var li_buy = document.createElement('li')
@@ -138,13 +203,14 @@
             var li_operating = document.createElement('li')
             li_id.innerText = id
             li_stock.innerText = co.stock
+            li_kline.innerText = kLineFn(co.kLine)
             li_buyMethod.innerText = buyMethodFn(co.buyMethod)
             li_time.innerHTML = co.timeStart + '<br>' + co.timeEnd
             li_buy.innerHTML = conditionFn(co.buy)
             li_sell.innerHTML = conditionFn(co.sell)
             li_total.innerText = co.total
             li_operating.append(operatingFn(id))
-            ul.append(li_id, li_stock, li_buyMethod, li_time, li_buy, li_sell, li_total, li_operating)
+            ul.append(li_id, li_stock, li_kline, li_buyMethod, li_time, li_buy, li_sell, li_total, li_operating)
             table.append(ul)
         })
         form.append(title)

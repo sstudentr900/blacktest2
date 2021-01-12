@@ -106,7 +106,7 @@ select:focus {
 }
 
 .backtest>div {
-    width: 25%;
+    width: 18%;
 }
 
 .backtest label {
@@ -127,7 +127,7 @@ select:focus {
 }
 
 .backtest .time {
-    width: 45%;
+    width: 40%;
     position: relative;
 }
 
@@ -205,7 +205,7 @@ select:focus {
     display: flex;
     margin-top: 10px;
     align-items: center;
-    padding: 10px 15px;
+    padding: 15px;
     border: 1px solid #adb5bd;
     position: relative;
 }
@@ -225,14 +225,18 @@ select:focus {
     box-sizing: border-box;
     border: none;
     color: #555555;
-    padding: 5px;
+    padding: 0 2px;
     font-size: 16px;
     text-align: center;
-    max-width: 55px;
+    max-width: 50px;
 }
 
 .technical select {
     max-width: inherit;
+}
+
+.technical span {
+    padding: 0 2px;
 }
 
 .technical>div>.ch {
@@ -263,14 +267,15 @@ select:focus {
     display: flex;
 }
 
-.technical .column_day span,
+
+/* .technical .column_day span,
 .technical .rsi_v span,
 .technical .rsi_day span,
 .technical .kd_v span,
 .technical .kd_day span,
 .technical .many_day span {
     line-height: 29px;
-}
+} */
 
 .technical .kd .kd_many_day_span,
 .technical .ma .ma_many_day_span,
@@ -333,7 +338,7 @@ select:focus {
 }
 
 .technology .technical {
-    width: 800px;
+    width: 1200px;
     background: #fff;
     padding: 60px;
     box-sizing: border-box;
@@ -474,9 +479,13 @@ select:focus {
 }
 
 #ranking .table {
-    border: 1px solid #adb5bd;
-    width: 1200px;
+    /* border: 1px solid #adb5bd; */
+    width: 1300px;
     margin: 40px 20px;
+}
+
+#ranking .table li {
+    font-size: 14px;
 }
 
 #ranking .table>ul {
@@ -485,7 +494,7 @@ select:focus {
 }
 
 #ranking .table>ul>li {
-    width: 10%;
+    width: 7%;
     padding: 20px;
     border-bottom: 1px solid #adb5bd;
     word-break: break-all;
@@ -503,7 +512,11 @@ select:focus {
     border-bottom: none;
 }
 
-#ranking .table>ul>li:nth-child(5),
-#ranking .table>ul>li:nth-child(6) {
-    width: 20%;
+#ranking .table>ul>li:nth-child(5) {
+    width: 8%;
+}
+
+#ranking .table>ul>li:nth-child(6),
+#ranking .table>ul>li:nth-child(7) {
+    width: 25%;
 }

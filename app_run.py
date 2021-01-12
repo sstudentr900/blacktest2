@@ -22,13 +22,15 @@ import psycopg2
 conn=psycopg2.connect(database='ddfcmko4fd6ghb',user='mcaeityvstcljq',password='72964581f46309cce56e649677be3c0148e1ee7d86b5d0d9901dca9c4f251988',host='ec2-34-232-24-202.compute-1.amazonaws.com',port='5432')
 cur = conn.cursor()
 
-
-#布林
-#macd
+#成交量大量
+#60分K
+#定期
+#跳空 長紅 突破
+#乖離
+#籌碼
 #抓出前高前低
-#全買全賣，獲利就買就賣
-#排名，id
-#優先
+#全買全賣
+#獲利就買就賣
 
 app= Flask(__name__, static_url_path='/static')
 app.config['DEBUG'] =True #是否開始除錯模式
@@ -41,7 +43,7 @@ def about():
 #ranking  
 @app.route('/ranking')
 def ranking():
-  sql = "SELECT * FROM public.rank ORDER BY id ASC" 
+  sql = "SELECT id, conditions, conditions ->> 'stock' as stock FROM public.rank ORDER BY stock ASC" 
   cur.execute(sql)
   count = cur.rowcount #查找到數量
   jsonValue = ''
@@ -80,8 +82,11 @@ def index_id(id):
     jsonValue['buyMethod'] = dataValue['buyMethod']
     jsonValue['timeStart'] = dataValue['timeStart']
     jsonValue['timeEnd'] = dataValue['timeEnd']
-    jsonValue['formBuy'] = dataValue['buy']
-    jsonValue['formSell'] = dataValue['sell']
+    jsonValue['kLine'] = dataValue.get('kLine') if dataValue.get('kLine') else 'd'
+    if 'buy' in dataValue:
+      jsonValue['formBuy'] = dataValue['buy']
+    if 'sell' in dataValue:
+      jsonValue['formSell'] = dataValue['sell']
     return render_template('index.html',jsonvalue= jsonValue)
   else:
     return redirect(url_for('index'))

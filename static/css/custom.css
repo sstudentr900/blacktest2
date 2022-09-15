@@ -206,8 +206,12 @@ select:focus {
     margin-top: 10px;
     align-items: center;
     padding: 15px;
-    border: 1px solid #adb5bd;
+    border-bottom: 1px solid #adb5bd;
     position: relative;
+}
+
+.technical>div:last-child {
+    border-bottom: none;
 }
 
 .technical>div>div {
@@ -335,17 +339,26 @@ select:focus {
     justify-content: center;
     align-items: center;
     display: none;
+    border: 1px solid #adb5bd;
+}
+
+.technology .box {
+    background: #fff;
+    padding: 60px;
 }
 
 .technology .technical {
-    width: 1200px;
-    background: #fff;
-    padding: 60px;
-    box-sizing: border-box;
+    overflow: auto;
+    width: 1000px;
+    max-height: 70vh;
     position: relative;
+    /* padding-right: 20px;
+    padding-bottom: 10px; */
+    padding: 0 20px 10px 20px;
+    border: 1px solid #adb5bd;
 }
 
-.technology .technical .link {
+.technology .link {
     display: flex;
     justify-content: space-between;
     margin-top: 0;
@@ -353,7 +366,7 @@ select:focus {
     border: none;
 }
 
-.technology .technical .link button {
+.technology .link button {
     width: 49%;
     border: none;
     color: #fff;
@@ -366,13 +379,13 @@ select:focus {
     border: 1px solid #fff;
 }
 
-.technology .technical .link button.close {
+.technology .link button.close {
     background-color: #fff;
     border: 1px solid #42495f;
     color: #42495f;
 }
 
-.technology .technical .link button.close:hover {
+.technology .link button.close:hover {
     background-color: #42495f;
     color: #fff;
     border: 1px solid #fff;
@@ -520,3 +533,6 @@ select:focus {
 #ranking .table>ul>li:nth-child(7) {
     width: 25%;
 }
+
+/*increase*/
+.increase

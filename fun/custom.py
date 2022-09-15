@@ -2,6 +2,7 @@
 import datetime,calendar
 #撈股票價格
 import pandas_datareader as pdr
+import yfinance as yf 
 # #时间序列的计算
 import numpy as np
 # #处理结构化的表格数据
@@ -9,30 +10,34 @@ import pandas as pd
 #撈股票
 def crawlData(obj):
     #股號
-    stock= '2330'
-    if obj['json'].get('stock'):
-        stock= obj['json'].get('stock')
-    else:
-        obj['json']['stock'] = stock   
+    stock= obj['json'].get('stock')
+    # stock= '2330'
+    # if obj['json'].get('stock'):
+    #     stock= obj['json'].get('stock')
+    # else:
+    #     obj['json']['stock'] = stock   
 
     #時間範圍
-    cur=datetime.datetime.now()
-    startYear = cur.year-int(3)
-    timeStart=  datetime.datetime(startYear, cur.month, cur.day)
-    if obj['json'].get('timeStart'):
-        timeStart= obj['json'].get('timeStart')
-    else:
-        obj['json']['timeStart'] = timeStart   
+    timeStart= obj['json'].get('timeStart').replace('/','-')    
+    timeEnd= obj['json'].get('timeEnd').replace('/','-')    
+    # cur=datetime.datetime.now()
+    # startYear = cur.year-int(3)
+    # timeStart=  datetime.datetime(startYear, cur.month, cur.day)
+    # if obj['json'].get('timeStart'):
+    #     timeStart= obj['json'].get('timeStart').replace('/','-')
+    # else:
+    #     obj['json']['timeStart'] = timeStart   
 
-    timeEnd=  datetime.datetime(cur.year, cur.month, cur.day)
-    if obj['json'].get('timeEnd'):
-        timeEnd= obj['json'].get('timeEnd')
-    else:
-        obj['json']['timeEnd'] = timeEnd    
+    # timeEnd=  datetime.datetime(cur.year, cur.month, cur.day)
+    # if obj['json'].get('timeEnd'):
+    #     timeEnd= obj['json'].get('timeEnd').replace('/','-')
+    # else:
+    #     obj['json']['timeEnd'] = timeEnd   
 
 
     #撈股票價格
-    df = pdr.DataReader(stock + '.TW', 'yahoo', timeStart, timeEnd)
+    # df = pdr.DataReader(stock + '.TW', 'yahoo', timeStart, timeEnd)
+    df = yf.download(stock + '.TW', start=timeStart, end=timeEnd) 
 
     if len(df):
         #K線
@@ -842,10 +847,8 @@ def index_send_Fn(jsons):
         'nowIndex':0,
         'profitrang':[],#停利
     }
-    # print('550',jsons)
     obj['json'] = jsons
     jsonValue = {'result': 'false','errorInfo':'找不到資料'}
-    # print('552',obj['json'])
     df=crawlData(obj=obj)
     if len(df):
         obj['df']= df
